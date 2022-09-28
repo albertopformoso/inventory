@@ -4,8 +4,9 @@ import (
 	"context"
 
 	"github.com/albertopformoso/inventory/database"
+	"github.com/albertopformoso/inventory/internal/repository"
+	"github.com/albertopformoso/inventory/internal/service"
 	"github.com/albertopformoso/inventory/settings"
-	"github.com/jmoiron/sqlx"
 	"go.uber.org/fx"
 )
 
@@ -15,13 +16,19 @@ func main() {
 			context.Background,
 			settings.New,
 			database.New,
+			repository.New,
+			service.New,
 		),
 		fx.Invoke(
-			func(db *sqlx.DB){
-				_, err := db.Query("SELECT * FROM user")
+			func(ctx context.Context, svc service.User) {
+				err := svc.RegisterUser(ctx, "my@email.com", "myname", "mypassword");
 				if err != nil {
 					panic(err)
 				}
+				user, err := svc.LoginUser(ctx, "my@email.com", "mypassword")
+				if err != nil { panic(err) }
+
+				if user.Name != "myname" { panic("wrong name") }
 			},
 		),
 	)
