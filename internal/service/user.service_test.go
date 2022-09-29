@@ -1,38 +1,13 @@
 package service
 
 import (
-	"context"
-	"os"
+	context "context"
 	"testing"
 
-	"github.com/albertopformoso/inventory/encryption"
-	"github.com/albertopformoso/inventory/internal/entity"
-	"github.com/albertopformoso/inventory/internal/repository"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-var repo *repository.MockUser
-var svc User
-
-func TestMain(m *testing.M) {
-	validPassword, _ := encryption.Encrypt([]byte("validPassword"))
-	encryptedPassword := encryption.ToBase64(validPassword)
-	user := &entity.User{
-		Email:    "test@exists.com",
-		Password: encryptedPassword,
-	}
-
-	repo = &repository.MockUser{}
-	repo.On("GetUserByEmail", mock.Anything, "test@test.com").Return(nil, nil)
-	repo.On("GetUserByEmail", mock.Anything, "test@exists.com").Return(user, nil)
-	repo.On("SaveUser", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-
-	svc = New(repo)
-
-	code := m.Run()
-	os.Exit(code)
-}
+var ctx context.Context = context.Background()
 
 func TestRegisterUser(t *testing.T) {
 	testCases := []struct {
@@ -57,8 +32,6 @@ func TestRegisterUser(t *testing.T) {
 			ExpectedError: ErrUserAlreadyExists,
 		},
 	}
-
-	ctx := context.Background()
 
 	for i := range testCases {
 		tc := testCases[i]
@@ -97,8 +70,6 @@ func TestLoginUser(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-
 	for i := range testCases {
 		tc := testCases[i]
 
@@ -108,6 +79,80 @@ func TestLoginUser(t *testing.T) {
 
 			// Logic
 			_, err := svc.LoginUser(ctx, tc.Email, tc.Password)
+
+			// Assertions
+			assert.Equal(t, tc.ExpectedError, err)
+		})
+	}
+}
+
+func TestAddUserRole(t *testing.T) {
+	testCases := []struct {
+		Name          string
+		UserID        int64
+		RoleID        int64
+		ExpectedError error
+	}{
+		{
+			Name:          "AddUserRole_Success",
+			UserID:        1,
+			RoleID:        2,
+			ExpectedError: nil,
+		},
+		{
+			Name:          "AddUserRole_UserAlreadyHasRole",
+			UserID:        1,
+			RoleID:        1,
+			ExpectedError: ErrUserRoleAlreadyAdded,
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Parallel()
+			repo.Mock.Test(t)
+
+			// Logic
+			err := svc.AddUserRole(ctx, tc.UserID, tc.RoleID)
+
+			// Assertions
+			assert.Equal(t, tc.ExpectedError, err)
+		})
+	}
+}
+
+func TestRemoveUserRole(t *testing.T) {
+	testCases := []struct {
+		Name          string
+		UserID        int64
+		RoleID        int64
+		ExpectedError error
+	}{
+		{
+			Name:          "RemoveUserRole_Success",
+			UserID:        1,
+			RoleID:        1,
+			ExpectedError: nil,
+		},
+		{
+			Name:          "RemoveUserRole_UserDoesNotHaveRole",
+			UserID:        1,
+			RoleID:        3,
+			ExpectedError: ErrRoleNotFound,
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Parallel()
+			repo.Mock.Test(t)
+
+			// Logic
+			err := svc.RemoveUserRole(ctx, tc.UserID, tc.RoleID)
 
 			// Assertions
 			assert.Equal(t, tc.ExpectedError, err)

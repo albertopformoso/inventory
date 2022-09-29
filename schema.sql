@@ -33,3 +33,7 @@ CREATE TABLE IF NOT EXISTS user_role (
     foreign key (user_id) references user(id),
     foreign key (role_id) references role(id)
 );
+
+INSERT INTO role (id, name) VALUES (1, 'admin');
+INSERT INTO role (id, name) VALUES (2, 'seller');
+INSERT INTO role (id, name) VALUES (3, 'customer');

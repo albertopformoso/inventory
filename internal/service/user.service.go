@@ -49,3 +49,39 @@ func (s *service) LoginUser(ctx context.Context, email, password string) (*model
 		Name:  user.Name,
 	}, nil
 }
+
+func (s *service) AddUserRole(ctx context.Context, userID, roleID int64) error {
+	roles, err := s.repository.GetUserRole(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	for _, role := range roles {
+		if role.RoleID == roleID {
+			return ErrUserRoleAlreadyAdded
+		}
+	}
+
+	return s.repository.SaveUserRole(ctx, userID, roleID)
+}
+
+func (s *service) RemoveUserRole(ctx context.Context, userID, roleID int64) error {
+	roles, err := s.repository.GetUserRole(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	var roleFound bool
+	for _, role := range roles {
+		if role.RoleID == roleID {
+			roleFound = true
+			break
+		}
+	}
+
+	if !roleFound {
+		return ErrRoleNotFound
+	}
+
+	return s.repository.RemoveUserRole(ctx, userID, roleID)
+}
