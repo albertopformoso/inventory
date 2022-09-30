@@ -24,13 +24,13 @@ func (s *service) RegisterUser(ctx context.Context, email, name, password string
 }
 
 func (s *service) LoginUser(ctx context.Context, email, password string) (*model.User, error) {
-	user, err := s.repository.GetUserByEmail(ctx, email)
+	u, err := s.repository.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
 
 	// Decrypt password
-	b64Password, err := encryption.FromBase64(user.Password)
+	b64Password, err := encryption.FromBase64(u.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -43,11 +43,13 @@ func (s *service) LoginUser(ctx context.Context, email, password string) (*model
 		return nil, ErrInvalidCredentials
 	}
 
-	return &model.User{
-		ID:    user.ID,
-		Email: user.Email,
-		Name:  user.Name,
-	}, nil
+	user := &model.User{
+		ID:    u.ID,
+		Email: u.Email,
+		Name:  u.Name,
+	}
+
+	return user, nil
 }
 
 func (s *service) AddUserRole(ctx context.Context, userID, roleID int64) error {

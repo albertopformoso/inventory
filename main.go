@@ -20,7 +20,7 @@ func main() {
 			service.New,
 		),
 		fx.Invoke(
-			func(ctx context.Context, svc service.User) {
+			func(ctx context.Context, svc service.Service) {
 				err := svc.RegisterUser(ctx, "my@email.com", "myname", "mypassword");
 				if err != nil {
 					panic(err)
