@@ -17,8 +17,3 @@ func (r *Routes) Start(e *echo.Echo, address string) error {
 	r.UserRoutes(e)
 	return e.Start(address)
 }
-
-func (r *Routes) UserRoutes(e *echo.Echo) {
-	users := e.Group("/users")
-	users.POST("/register", r.controller.RegisterUser)
-}
