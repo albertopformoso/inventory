@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/albertopformoso/inventory/database"
-	"github.com/albertopformoso/inventory/internal/api"
+	"github.com/albertopformoso/inventory/internal/controller"
 	"github.com/albertopformoso/inventory/internal/repository"
+	"github.com/albertopformoso/inventory/internal/routes"
 	"github.com/albertopformoso/inventory/internal/service"
 	"github.com/albertopformoso/inventory/settings"
 	"github.com/labstack/echo/v4"
@@ -21,7 +23,8 @@ func main() {
 			database.New,
 			repository.New,
 			service.New,
-			api.New,
+			controller.New,
+			routes.New,
 			echo.New,
 		),
 		fx.Invoke(
@@ -32,15 +35,16 @@ func main() {
 	app.Run()
 }
 
-func setLifeCycle(lc fx.Lifecycle, e *echo.Echo, api *api.API, s *settings.Settings) {
+func setLifeCycle(lc fx.Lifecycle, e *echo.Echo, r *routes.Routes, s *settings.Settings) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			address := fmt.Sprintf(":%s", s.Port)
-			go api.Start(e, address)
+			go r.Start(e, address)
 
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
+			log.Println("Stopping server...")
 			return nil
 		},
 	})
