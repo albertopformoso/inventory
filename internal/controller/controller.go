@@ -8,6 +8,7 @@ import (
 
 type Controller interface {
 	RegisterUser(c echo.Context) error
+	LoginUser(c echo.Context) error
 }
 
 type controller struct {
