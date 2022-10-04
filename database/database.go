@@ -6,8 +6,8 @@ import (
 
 	"github.com/albertopformoso/inventory/settings"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 func New(ctx context.Context, s *settings.Settings) (*sqlx.DB, error) {

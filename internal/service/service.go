@@ -5,6 +5,8 @@ import (
 
 	"github.com/albertopformoso/inventory/internal/model"
 	"github.com/albertopformoso/inventory/internal/repository"
+	"github.com/albertopformoso/inventory/logger"
+	"github.com/rs/zerolog"
 )
 
 // Service is the business logic of the application.
@@ -24,8 +26,12 @@ type Service interface {
 
 type service struct {
 	repository repository.Repository
+	log        *zerolog.Logger
 }
 
 func New(repository repository.Repository) Service {
-	return &service{repository: repository}
+	return &service{
+		repository: repository,
+		log:        logger.New(),
+	}
 }

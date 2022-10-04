@@ -4,5 +4,5 @@ import "errors"
 
 var (
 	ErrInternalServerError = errors.New("internal server error")
-	ErrInvalidRequest = errors.New("invalid request")
+	ErrInvalidRequest      = errors.New("invalid request")
 )

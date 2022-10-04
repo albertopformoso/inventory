@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/albertopformoso/inventory/encryption"
@@ -15,14 +14,14 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 	// Get auth token from cookie
 	cookie, err := c.Cookie("Authorization")
 	if err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("Retrieve token faild")
 		return c.JSONPretty(http.StatusUnauthorized, responseMsg{Message: "Unauthorized"}, "  ")
 	}
 
 	// Parse the jwt token
 	claims, err := encryption.ParseLoginJWT(cookie.Value)
 	if err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("Unauthorized")
 		if err.Error() == "Token is expired" {
 			return c.JSONPretty(http.StatusUnauthorized, responseMsg{Message: err.Error()}, "  ")
 		}
@@ -36,12 +35,12 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 	params := dto.AddProduct{}
 
 	if err := c.Bind(&params); err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("failed to bind params")
 		return c.JSONPretty(http.StatusBadRequest, responseMsg{Message: ErrInvalidRequest.Error()}, "  ")
 	}
 
 	if err := ctrl.dataValidator.Struct(params); err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("data validator: data isn't correct")
 		return c.JSONPretty(http.StatusBadRequest, responseMsg{Message: ErrInvalidRequest.Error()}, "  ")
 	}
 
@@ -52,7 +51,7 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 	}
 
 	if err := ctrl.service.AddProduct(ctx, p, email); err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("add product failed")
 
 		if err == service.ErrInvalidPermissions {
 			return c.JSONPretty(http.StatusForbidden, responseMsg{Message: service.ErrInvalidPermissions.Error()}, "  ")

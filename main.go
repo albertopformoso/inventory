@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/albertopformoso/inventory/database"
 	"github.com/albertopformoso/inventory/internal/controller"
 	"github.com/albertopformoso/inventory/internal/repository"
 	"github.com/albertopformoso/inventory/internal/routes"
 	"github.com/albertopformoso/inventory/internal/service"
+	"github.com/albertopformoso/inventory/logger"
 	"github.com/albertopformoso/inventory/settings"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog"
 	"go.uber.org/fx"
 )
 
@@ -20,6 +21,7 @@ func main() {
 		fx.Provide(
 			context.Background,
 			settings.New,
+			logger.New,
 			database.New,
 			repository.New,
 			service.New,
@@ -35,7 +37,7 @@ func main() {
 	app.Run()
 }
 
-func setLifeCycle(lc fx.Lifecycle, e *echo.Echo, r *routes.Routes, s *settings.Settings) {
+func setLifeCycle(lc fx.Lifecycle, e *echo.Echo, r *routes.Routes, s *settings.Settings, log *zerolog.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			address := fmt.Sprintf(":%s", s.Port)
@@ -44,7 +46,7 @@ func setLifeCycle(lc fx.Lifecycle, e *echo.Echo, r *routes.Routes, s *settings.S
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			log.Println("Stopping server...")
+			log.Info().Msg("Stopping server...")
 			return nil
 		},
 	})

@@ -26,7 +26,9 @@ func New() (*Settings, error) {
 	var s Settings
 
 	err := yaml.Unmarshal(settingsFile, &s)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	return &s, nil
 }

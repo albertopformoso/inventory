@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/albertopformoso/inventory/encryption"
@@ -39,34 +38,34 @@ func (ctrl *controller) LoginUser(c echo.Context) error {
 	params := dto.LoginUser{}
 
 	if err := c.Bind(&params); err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("user params binding failed")
 		return c.JSONPretty(http.StatusBadRequest, responseMsg{Message: ErrInvalidRequest.Error()}, "  ")
 	}
 
 	if err := ctrl.dataValidator.Struct(params); err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("data validator: data isn't correct")
 		return c.JSONPretty(http.StatusBadRequest, responseMsg{Message: err.Error()}, "  ")
 	}
 
 	u, err := ctrl.service.LoginUser(ctx, params.Email, params.Password)
 	if err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("login failed")
 		return c.JSONPretty(http.StatusInternalServerError, responseMsg{Message: ErrInternalServerError.Error()}, "  ")
 	}
 
 	token, err := encryption.SignedLoginToken(u)
 	if err != nil {
-		log.Println(err)
+		ctrl.log.Err(err).Msg("faild to generate token")
 		return c.JSONPretty(http.StatusInternalServerError, responseMsg{Message: ErrInternalServerError.Error()}, "  ")
 	}
 
 	cookie := &http.Cookie{
-		Name: "Authorization",
-		Value: token,
-		Secure: true,
+		Name:     "Authorization",
+		Value:    token,
+		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 		HttpOnly: true,
-		Path: "/",
+		Path:     "/",
 	}
 
 	c.SetCookie(cookie)

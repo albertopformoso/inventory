@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/albertopformoso/inventory/internal/entity"
+	"github.com/albertopformoso/inventory/logger"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog"
 )
 
 // Repository is the interface that wraps the basic CRUD operations
@@ -24,9 +26,13 @@ type Repository interface {
 }
 
 type repository struct {
-	db *sqlx.DB
+	db  *sqlx.DB
+	log *zerolog.Logger
 }
 
 func New(db *sqlx.DB) Repository {
-	return &repository{db: db}
+	return &repository{
+		db:  db,
+		log: logger.New(),
+	}
 }
