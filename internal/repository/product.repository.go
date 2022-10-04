@@ -8,7 +8,7 @@ import (
 
 const (
 	queryInsertProduct = `
-	INSERT INTO product (name, description price, created_by) VALUES (?, ?, ?, ?);`
+	INSERT INTO product (name, description, price, created_by) VALUES (?, ?, ?, ?);`
 	queryGetAllProducts = `
 	SELECT id, name, description, price, created_by FROM product;`
 	queryGetProductByID = `
