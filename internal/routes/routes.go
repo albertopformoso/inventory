@@ -7,22 +7,32 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-type Routes struct {
+type Routes interface {
+	Init(e *echo.Echo)
+}
+
+type routes struct {
 	controller controller.Controller
 }
 
-func New(controller controller.Controller) *Routes {
-	return &Routes{controller: controller}
+func New(controller controller.Controller) Routes {
+	return &routes{controller: controller}
 }
 
-// Initialize the routes.
-func (r *Routes) RegisterRoutes(e *echo.Echo) {
-	r.UserRoutes(e)
-	r.ProductRoutes(e)
+// Init configure server routes.
+func (r *routes) Init(e *echo.Echo) {
+	r.configMiddlewares(e)
+	r.registerRoutes(e)
+}
+
+// Register the routes.
+func (r *routes) registerRoutes(e *echo.Echo) {
+	r.userRoutes(e)
+	r.productRoutes(e)
 }
 
 // Setting up the middlewares for the server.
-func (r *Routes) ConfigMiddlewares(e *echo.Echo) {
+func (r *routes) configMiddlewares(e *echo.Echo) {
 	e.Use(
 		middleware.RecoverWithConfig(middleware.RecoverConfig{
 			Skipper:   middleware.DefaultSkipper,
@@ -55,12 +65,4 @@ func (r *Routes) ConfigMiddlewares(e *echo.Echo) {
 			AllowHeaders:     []string{echo.HeaderContentType},
 			AllowCredentials: true,
 		}))
-}
-
-// Starting the server.
-func (r *Routes) Start(e *echo.Echo, address string) error {
-	r.ConfigMiddlewares(e)
-	r.RegisterRoutes(e)
-
-	return e.Start(address)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/albertopformoso/inventory/cmd/server"
 	"github.com/albertopformoso/inventory/database"
 	"github.com/albertopformoso/inventory/internal/controller"
 	"github.com/albertopformoso/inventory/internal/repository"
@@ -28,6 +29,7 @@ func main() {
 			controller.New,
 			routes.New,
 			echo.New,
+			server.New,
 		),
 		fx.Invoke(
 			setLifeCycle,
@@ -37,11 +39,11 @@ func main() {
 	app.Run()
 }
 
-func setLifeCycle(lc fx.Lifecycle, e *echo.Echo, r *routes.Routes, s *settings.Settings, log *zerolog.Logger) {
+func setLifeCycle(lc fx.Lifecycle, e *echo.Echo, server *server.Server, s *settings.Settings, log *zerolog.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			address := fmt.Sprintf(":%s", s.Port)
-			go r.Start(e, address)
+			go server.Start(e, address)
 
 			return nil
 		},
