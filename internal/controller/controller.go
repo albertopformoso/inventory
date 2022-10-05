@@ -11,6 +11,8 @@ import (
 type Controller interface {
 	RegisterUser(c echo.Context) error
 	LoginUser(c echo.Context) error
+	AddUserRole(c echo.Context) error
+	RemoveUserRole(c echo.Context) error
 
 	AddProduct(c echo.Context) error
 }

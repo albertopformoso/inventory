@@ -16,7 +16,7 @@ const (
 		WHERE email = ?;`
 
 	queryInsertUserRole = `
-		INSERT INTO user_role (user_id, role_id) VALUES(:user_role, :role_id);`
+		INSERT INTO user_role (user_id, role_id) VALUES(:user_id, :role_id);`
 	queryRemoveUserRole = `
 		DELETE FROM user_role WHERE user_id = :user_id and role_id = :role_id;`
 )

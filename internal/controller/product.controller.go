@@ -5,6 +5,7 @@ import (
 
 	"github.com/albertopformoso/inventory/encryption"
 	"github.com/albertopformoso/inventory/internal/controller/dto"
+	"github.com/albertopformoso/inventory/internal/helper"
 	"github.com/albertopformoso/inventory/internal/model"
 	"github.com/albertopformoso/inventory/internal/service"
 	"github.com/labstack/echo/v4"
@@ -15,7 +16,8 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 	cookie, err := c.Cookie("Authorization")
 	if err != nil {
 		ctrl.log.Err(err).Msg("Retrieve token faild")
-		return c.JSONPretty(http.StatusUnauthorized, responseMsg{Message: "Unauthorized"}, "  ")
+		res := helper.BuildErrorResopnse("retrive token failed", "Unauthorized", helper.EmptyObj{})
+		return c.JSONPretty(http.StatusUnauthorized, res, "  ")
 	}
 
 	// Parse the jwt token
@@ -23,9 +25,12 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 	if err != nil {
 		ctrl.log.Err(err).Msg("Unauthorized")
 		if err.Error() == "Token is expired" {
-			return c.JSONPretty(http.StatusUnauthorized, responseMsg{Message: err.Error()}, "  ")
+			res := helper.BuildErrorResopnse("expired token", err.Error(), helper.EmptyObj{})
+			return c.JSONPretty(http.StatusUnauthorized, res, "  ")
 		}
-		return c.JSONPretty(http.StatusUnauthorized, responseMsg{Message: "Unauthorized"}, "  ")
+
+		res := helper.BuildErrorResopnse("Cannot validate token", "Unauthorized", helper.EmptyObj{})
+		return c.JSONPretty(http.StatusUnauthorized, res, "  ")
 	}
 
 	email := claims["email"].(string)
@@ -36,12 +41,14 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 
 	if err := c.Bind(&params); err != nil {
 		ctrl.log.Err(err).Msg("failed to bind params")
-		return c.JSONPretty(http.StatusBadRequest, responseMsg{Message: ErrInvalidRequest.Error()}, "  ")
+		res := helper.BuildErrorResopnse("invalid parameters", ErrInvalidRequest.Error(), helper.EmptyObj{})
+		return c.JSONPretty(http.StatusBadRequest, res, "  ")
 	}
 
 	if err := ctrl.dataValidator.Struct(params); err != nil {
 		ctrl.log.Err(err).Msg("data validator: data isn't correct")
-		return c.JSONPretty(http.StatusBadRequest, responseMsg{Message: ErrInvalidRequest.Error()}, "  ")
+		res := helper.BuildErrorResopnse("invalid data", ErrInvalidRequest.Error(), helper.EmptyObj{})
+		return c.JSONPretty(http.StatusBadRequest, res, "  ")
 	}
 
 	p := model.Product{
@@ -54,11 +61,14 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 		ctrl.log.Err(err).Msg("add product failed")
 
 		if err == service.ErrInvalidPermissions {
-			return c.JSONPretty(http.StatusForbidden, responseMsg{Message: service.ErrInvalidPermissions.Error()}, "  ")
+			res := helper.BuildErrorResopnse("Unauthorized", err.Error(), helper.EmptyObj{})
+			return c.JSONPretty(http.StatusForbidden, res, "  ")
 		}
 
-		return c.JSONPretty(http.StatusInternalServerError, responseMsg{Message: ErrInternalServerError.Error()}, "  ")
+		res := helper.BuildErrorResopnse("server error", ErrInternalServerError.Error(), helper.EmptyObj{})
+		return c.JSONPretty(http.StatusInternalServerError, res, "  ")
 	}
 
-	return c.JSONPretty(http.StatusCreated, nil, "  ")
+	res := helper.BuildResponse("product added successfully", params)
+	return c.JSONPretty(http.StatusCreated, res, "  ")
 }
