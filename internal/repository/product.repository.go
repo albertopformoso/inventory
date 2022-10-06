@@ -36,11 +36,12 @@ func (r *repository) GetProducts(ctx context.Context) ([]entity.Product, error) 
 	return pp, nil
 }
 func (r *repository) GetProduct(ctx context.Context, id int64) (*entity.Product, error) {
-	p := &entity.Product{}
-	err := r.db.SelectContext(ctx, p, queryGetProductByID, id)
+	pp := []entity.Product{}
+	err := r.db.SelectContext(ctx, &pp, queryGetProductByID, id)
 	if err != nil {
 		return nil, err
 	}
 
+	p := &pp[0]
 	return p, nil
 }

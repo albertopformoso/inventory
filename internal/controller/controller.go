@@ -15,6 +15,8 @@ type Controller interface {
 	RemoveUserRole(c echo.Context) error
 
 	AddProduct(c echo.Context) error
+	GetProducts(c echo.Context) error
+	GetProduct(c echo.Context) error
 }
 
 type controller struct {

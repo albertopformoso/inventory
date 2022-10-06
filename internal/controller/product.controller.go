@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/albertopformoso/inventory/encryption"
 	"github.com/albertopformoso/inventory/internal/controller/dto"
@@ -71,4 +72,40 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 
 	res := helper.BuildResponse("product added successfully", params)
 	return c.JSONPretty(http.StatusCreated, res, "  ")
+}
+
+func (ctrl *controller) GetProducts(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	pp, err := ctrl.service.GetProducts(ctx)
+	if err != nil {
+		ctrl.log.Err(err).Msg("faild to get products")
+		res := helper.BuildErrorResopnse("cannot get products", ErrInternalServerError.Error(), helper.EmptyObj{})
+		return c.JSONPretty(http.StatusInternalServerError, res, "  ")
+	}
+
+	res := helper.BuildResponse("products list", pp)
+	return c.JSONPretty(http.StatusOK, res, "  ")
+}
+
+func (ctrl *controller) GetProduct(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	id := c.Param("id")
+	pid, err := strconv.ParseInt(id, 0, 64)
+	if err != nil {
+		ctrl.log.Err(err).Msg("invalid product id")
+		res := helper.BuildErrorResopnse("invalid product id", ErrInvalidRequest.Error(), helper.EmptyObj{})
+		return c.JSONPretty(http.StatusBadRequest, res, "  ")
+	}
+
+	p, err := ctrl.service.GetProduct(ctx, pid)
+	if err != nil {
+		ctrl.log.Err(err).Msg("faild to get the product")
+		res := helper.BuildErrorResopnse("cannot get the product", ErrInternalServerError.Error(), helper.EmptyObj{})
+		return c.JSONPretty(http.StatusInternalServerError, res, "  ")
+	}
+
+	res := helper.BuildResponse("product retrieved successfully", p)
+	return c.JSONPretty(http.StatusOK, res, "  ")
 }
