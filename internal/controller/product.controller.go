@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/albertopformoso/inventory/encryption"
 	"github.com/albertopformoso/inventory/internal/controller/dto"
 	"github.com/albertopformoso/inventory/internal/helper"
 	"github.com/albertopformoso/inventory/internal/model"
@@ -13,31 +12,9 @@ import (
 )
 
 func (ctrl *controller) AddProduct(c echo.Context) error {
-	// Get auth token from cookie
-	cookie, err := c.Cookie("Authorization")
-	if err != nil {
-		ctrl.log.Err(err).Msg("Retrieve token faild")
-		res := helper.BuildErrorResopnse("retrive token failed", "Unauthorized", helper.EmptyObj{})
-		return c.JSONPretty(http.StatusUnauthorized, res, "  ")
-	}
-
-	// Parse the jwt token
-	claims, err := encryption.ParseLoginJWT(cookie.Value)
-	if err != nil {
-		ctrl.log.Err(err).Msg("Unauthorized")
-		if err.Error() == "Token is expired" {
-			res := helper.BuildErrorResopnse("expired token", err.Error(), helper.EmptyObj{})
-			return c.JSONPretty(http.StatusUnauthorized, res, "  ")
-		}
-
-		res := helper.BuildErrorResopnse("Cannot validate token", "Unauthorized", helper.EmptyObj{})
-		return c.JSONPretty(http.StatusUnauthorized, res, "  ")
-	}
-
-	email := claims["email"].(string)
-
 	// Get the payload from the request
 	ctx := c.Request().Context()
+	email := c.Get("email").(string)
 	params := dto.AddProduct{}
 
 	if err := c.Bind(&params); err != nil {
@@ -76,6 +53,7 @@ func (ctrl *controller) AddProduct(c echo.Context) error {
 
 func (ctrl *controller) GetProducts(c echo.Context) error {
 	ctx := c.Request().Context()
+	ctrl.log.Info().Msgf("Cookie: %v", c.Get("email"))
 
 	pp, err := ctrl.service.GetProducts(ctx)
 	if err != nil {
