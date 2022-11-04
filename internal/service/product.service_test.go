@@ -8,14 +8,15 @@ import (
 )
 
 func TestAddProduct(t *testing.T) {
-	testCases := []struct {
-		Name          string
+
+	type testCase struct {
 		Product       model.Product
 		Email         string
 		ExpectedError error
-	}{
-		{
-			Name: "AddProduct_Success",
+	}
+
+	cases := map[string]testCase{
+		"AddProduct_Success": {
 			Product: model.Product{
 				Name:        "Test Product",
 				Description: "Test Description",
@@ -24,8 +25,7 @@ func TestAddProduct(t *testing.T) {
 			Email:         "admin@email.com",
 			ExpectedError: nil,
 		},
-		{
-			Name: "AddProduct_InvalidPermissions",
+		"AddProduct_InvalidPermissions": {
 			Product: model.Product{
 				Name:        "Test Product",
 				Description: "Test Description",
@@ -36,10 +36,8 @@ func TestAddProduct(t *testing.T) {
 		},
 	}
 
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.Name, func(t *testing.T) {
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			repo.Mock.Test(t)
 
@@ -53,14 +51,15 @@ func TestAddProduct(t *testing.T) {
 }
 
 func TestGetProducts(t *testing.T) {
-	testCases := []struct {
-		Name             string
+
+	type testCase struct {
 		ID               int64
 		ExpectedProducts []model.Product
 		ExpectedError    error
-	}{
-		{
-			Name: "GetProducts_Success",
+	}
+
+	cases := map[string]testCase{
+		"GetProducts_Success": {
 			ExpectedProducts: []model.Product{
 				{
 					Name:        "Test Product",
@@ -68,14 +67,11 @@ func TestGetProducts(t *testing.T) {
 					Price:       10.00,
 				},
 			},
-			ExpectedError: nil,
 		},
 	}
 
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.Name, func(t *testing.T) {
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			repo.Mock.Test(t)
 
@@ -98,15 +94,16 @@ func TestGetProducts(t *testing.T) {
 }
 
 func TestGetProduct(t *testing.T) {
-	testCases := []struct {
-		Name            string
+
+	type testCase struct {
 		ID              int64
 		ExpectedProduct model.Product
 		ExpectedError   error
-	}{
-		{
-			Name: "GetProduct_Success",
-			ID:   1,
+	}
+
+	cases := map[string]testCase{
+		"GetProduct_Success": {
+			ID: 1,
 			ExpectedProduct: model.Product{
 				Name:        "Test Product",
 				Description: "Test Description",
@@ -116,10 +113,8 @@ func TestGetProduct(t *testing.T) {
 		},
 	}
 
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.Name, func(t *testing.T) {
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			repo.Mock.Test(t)
 
