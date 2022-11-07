@@ -2,8 +2,10 @@ package repository
 
 import (
 	context "context"
+	"errors"
 
 	entity "github.com/albertopformoso/inventory/internal/entity"
+	"github.com/albertopformoso/inventory/internal/helper"
 )
 
 const (
@@ -17,8 +19,14 @@ const (
 	WHERE id = ?`
 )
 
-func (r *repository) SaveProduct(ctx context.Context, name, description string, price float32, createdBy int64) error {
-	_, err := r.db.ExecContext(ctx, queryInsertProduct, name, description, price, createdBy)
+func (r *repository) SaveProduct(ctx context.Context, name, description string, price float32, createdBy int64) (err error) {
+	defer helper.PanicRecover(func(e interface{}) {
+		r.log.Error().Msgf("panicRecovered - error:", e)
+
+		err = errors.New("unexpected Failed to Save Product - recovered into unhandled error")
+	})
+
+	_, err = r.db.ExecContext(ctx, queryInsertProduct, name, description, price, createdBy)
 	if err != nil {
 		return err
 	}

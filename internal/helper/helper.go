@@ -1,6 +1,10 @@
 package helper
 
-import "strings"
+import (
+	"log"
+	"runtime/debug"
+	"strings"
+)
 
 // Response for static shape json return
 type Response struct {
@@ -33,4 +37,13 @@ func BuildErrorResopnse(message, err string, data any) Response {
 	}
 
 	return res
+}
+
+// `PanicRecover` is a function that takes a function as an argument and calls it if a panic is caught
+func PanicRecover(action func(e interface{})) {
+	if e := recover(); e != nil {
+		log.Println("panic caught and recoverd:", e)
+		log.Panicln("stacktrace:", string(debug.Stack()))
+		action(e)
+	}
 }
